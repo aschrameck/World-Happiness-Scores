@@ -1,0 +1,74 @@
+---
+title: "Happiness data"
+author: "Aubrey Schrameck"
+date: "2024-11-19"
+output: pdf_document
+---
+Packages used
+```{r}
+library(tidyverse)
+library(maps)
+```
+
+
+
+Import data set
+```{r}
+happiness <- read.csv("world-happiness-report-2021.csv")
+```
+
+
+Subset country name, region, happiness score, GDP per capita, and happiness life expectancy
+```{r}
+happiness <- subset(happiness, select = c(Country.name, Regional.indicator, Ladder.score, Logged.GDP.per.capita, Healthy.life.expectancy))
+head(happiness)
+```
+
+Check data types, make region a factor, and rename America
+```{r}
+happiness$Regional.indicator <- as.factor(happiness$Regional.indicator)
+happiness[19,1] <- "USA"
+str(happiness)
+```
+
+Set up map
+```{r}
+world.map <- map_data("world")
+happiness.map <- merge (world.map, happiness, by.x = "region", by.y = "Country.name")
+happiness.map <- arrange (happiness.map, group, order )
+```
+
+
+Map of happiness scores
+```{r}
+ggplot (happiness.map , aes(long, lat, group = group, fill = Ladder.score)) +
+  geom_polygon(color = " black ") +
+  scale_fill_gradient(low = "white", high = "darkgreen" )
+```
+
+
+Chart of GDP per Capita vs Happiness score
+```{r}
+ggplot (happiness, aes(x = Logged.GDP.per.capita, y = Ladder.score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=F) +
+  xlab("GDP per Capita") +
+  ylab("Happiness Score")
+  
+```
+
+Chart of happiness level vs healthy life expectancy
+```{r}
+ggplot (happiness, aes(x = Ladder.score, y = Healthy.life.expectancy)) +
+  geom_point(aes(color = Regional.indicator)) +
+  ylab("Healthy Life Expectancy") +
+  xlab("Happiness Score")
+  
+```
+Map of healthy life expectancy
+```{r}
+ggplot (happiness.map , aes(long, lat, group = group, fill = Healthy.life.expectancy)) +
+  geom_polygon(color = " black ") +
+  scale_fill_gradient(low = "white", high = "Orange" )
+```
+
